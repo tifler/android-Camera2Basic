@@ -319,6 +319,13 @@ class Camera2BasicFragment : Fragment(), View.OnClickListener,
             for (cameraId in manager.cameraIdList) {
                 val characteristics = manager.getCameraCharacteristics(cameraId)
 
+                characteristics.availableCaptureRequestKeys.forEach { key -> Log.e(TAG, "$key") }
+
+                val pixelSize = characteristics.get(CameraCharacteristics.SENSOR_INFO_PIXEL_ARRAY_SIZE)
+                val activeSize = characteristics.get(CameraCharacteristics.SENSOR_INFO_ACTIVE_ARRAY_SIZE)
+                Log.e(TAG, "PIXEL_ARRAY_SIZE=$pixelSize")
+                Log.e(TAG, "ACTIVE_ARRAY_SIZE=$activeSize")
+
                 // We don't use a front facing camera in this sample.
                 val cameraDirection = characteristics.get(CameraCharacteristics.LENS_FACING)
                 if (cameraDirection != null &&
@@ -333,6 +340,7 @@ class Camera2BasicFragment : Fragment(), View.OnClickListener,
                 val largest = Collections.max(
                         Arrays.asList(*map.getOutputSizes(ImageFormat.JPEG)),
                         CompareSizesByArea())
+                Log.e(TAG, ">> cameraId=${cameraId} largest=${largest}")
                 imageReader = ImageReader.newInstance(largest.width, largest.height,
                         ImageFormat.JPEG, /*maxImages*/ 2).apply {
                     setOnImageAvailableListener(onImageAvailableListener, backgroundHandler)
@@ -362,6 +370,10 @@ class Camera2BasicFragment : Fragment(), View.OnClickListener,
                         rotatedPreviewWidth, rotatedPreviewHeight,
                         maxPreviewWidth, maxPreviewHeight,
                         largest)
+
+                val sizes = map.getOutputSizes(SurfaceTexture::class.java)
+                sizes.indices.forEach { i -> Log.e(TAG, "sizes[$i] = ${sizes[i]}") }
+                Log.e(TAG, "previewSize=${previewSize}")
 
                 // We fit the aspect ratio of TextureView to the size of preview we picked.
                 if (resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
@@ -505,6 +517,8 @@ class Camera2BasicFragment : Fragment(), View.OnClickListener,
             )
             previewRequestBuilder.addTarget(surface)
 
+            Log.e(TAG, "Before calling createCaptureSession()", Exception("STACK TRACE"))
+
             // Here, we create a CameraCaptureSession for camera preview.
             cameraDevice?.createCaptureSession(Arrays.asList(surface, imageReader?.surface),
                     object : CameraCaptureSession.StateCallback() {
@@ -524,8 +538,12 @@ class Camera2BasicFragment : Fragment(), View.OnClickListener,
 
                                 // Finally, we start displaying the camera preview.
                                 previewRequest = previewRequestBuilder.build()
+                                Log.e(TAG, "previewRequest=${previewRequest}")
                                 captureSession?.setRepeatingRequest(previewRequest,
                                         captureCallback, backgroundHandler)
+
+                                Log.e(TAG, "Method called on the UI thread", Exception("STACK TRACE"))
+
                             } catch (e: CameraAccessException) {
                                 Log.e(TAG, e.toString())
                             }
