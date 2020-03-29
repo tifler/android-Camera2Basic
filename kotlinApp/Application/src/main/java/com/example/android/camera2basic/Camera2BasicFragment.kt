@@ -21,11 +21,7 @@ import android.app.AlertDialog
 import android.content.Context
 import android.content.pm.PackageManager
 import android.content.res.Configuration
-import android.graphics.ImageFormat
-import android.graphics.Matrix
-import android.graphics.Point
-import android.graphics.RectF
-import android.graphics.SurfaceTexture
+import android.graphics.*
 import android.hardware.camera2.CameraAccessException
 import android.hardware.camera2.CameraCaptureSession
 import android.hardware.camera2.CameraCharacteristics
@@ -535,6 +531,19 @@ class Camera2BasicFragment : Fragment(), View.OnClickListener,
                                         CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE)
                                 // Flash is automatically enabled when necessary.
                                 setAutoFlash(previewRequestBuilder)
+
+                                var crop = previewRequestBuilder.get(CaptureRequest.SCALER_CROP_REGION)
+                                Log.e(TAG, "SCALER_CROP_REGION=${crop}")
+                                val hoff = 1000;
+                                val voff = 1000;
+
+                                crop.left = crop.left + hoff;
+                                crop.right = crop.right - hoff;
+                                crop.top = crop.top + voff;
+                                crop.bottom = crop.bottom - voff;
+                                Log.e(TAG, "SCALER_CROP_REGION=${crop}")
+
+                                previewRequestBuilder.set(CaptureRequest.SCALER_CROP_REGION, crop)
 
                                 // Finally, we start displaying the camera preview.
                                 previewRequest = previewRequestBuilder.build()
