@@ -313,6 +313,7 @@ class Camera2BasicFragment : Fragment(), View.OnClickListener,
         val manager = activity.getSystemService(Context.CAMERA_SERVICE) as CameraManager
         try {
             for (cameraId in manager.cameraIdList) {
+                Log.e(TAG, "***** cameraId=" + cameraId)
                 val characteristics = manager.getCameraCharacteristics(cameraId)
 
                 characteristics.availableCaptureRequestKeys.forEach { key -> Log.e(TAG, "$key") }
@@ -325,7 +326,7 @@ class Camera2BasicFragment : Fragment(), View.OnClickListener,
                 // We don't use a front facing camera in this sample.
                 val cameraDirection = characteristics.get(CameraCharacteristics.LENS_FACING)
                 if (cameraDirection != null &&
-                        cameraDirection == CameraCharacteristics.LENS_FACING_FRONT) {
+                        cameraDirection == CameraCharacteristics.LENS_FACING_BACK) {
                     continue
                 }
 
@@ -534,13 +535,11 @@ class Camera2BasicFragment : Fragment(), View.OnClickListener,
 
                                 var crop = previewRequestBuilder.get(CaptureRequest.SCALER_CROP_REGION)
                                 Log.e(TAG, "SCALER_CROP_REGION=${crop}")
-                                val hoff = 1000;
-                                val voff = 1000;
 
-                                crop.left = crop.left + hoff;
-                                crop.right = crop.right - hoff;
-                                crop.top = crop.top + voff;
-                                crop.bottom = crop.bottom - voff;
+                                crop.left = 0;
+                                crop.right = 704;
+                                crop.top = 0;
+                                crop.bottom = 478;
                                 Log.e(TAG, "SCALER_CROP_REGION=${crop}")
 
                                 previewRequestBuilder.set(CaptureRequest.SCALER_CROP_REGION, crop)
